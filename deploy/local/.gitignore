@@ -1,0 +1,6 @@
+# Don't check local tf artifacts into git
+.terraform
+.terraform.lock.hcl
+terraform.tfstate
+terraform.tfstate.backup
+meltano-cluster-config

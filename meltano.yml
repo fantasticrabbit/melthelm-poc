@@ -1,3 +1,10 @@
 version: 1
 send_anonymous_usage_stats: true
 project_id: a855d787-5d58-44b3-a534-a652a1fec24b
+plugins:
+  orchestrators:
+  - name: airflow
+    pip_url: apache-airflow==2.1.2 --constraint https://raw.githubusercontent.com/apache/airflow/constraints-2.1.2/constraints-${MELTANO__PYTHON_VERSION}.txt
+  files:
+  - name: airflow
+    pip_url: git+https://gitlab.com/meltano/files-airflow.git
