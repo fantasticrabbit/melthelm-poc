@@ -4,11 +4,11 @@ FROM $MELTANO_IMAGE
 WORKDIR /project
 
 # Install any additional requirements
-COPY ./requirements.txt . 
+COPY ./requirements.txt .
 RUN pip install -r requirements.txt
 
 # Install all plugins into the `.meltano` directory
-COPY ./meltano.yml . 
+COPY ./meltano.yml .
 RUN meltano install
 
 # Pin `discovery.yml` manifest by copying cached version to project root

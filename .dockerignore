@@ -1,0 +1,4 @@
+.git
+.meltano
+# Don't add the orchestrate dir for local development
+orchestrate/

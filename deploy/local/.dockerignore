@@ -1,2 +1,5 @@
-# Don't add the orchestrate file for local development
-orchestrate/
+.terraform
+.terraform.lock.hcl
+terraform.tfstate
+terraform.tfstate.backup
+meltano-cluster-config

@@ -19,4 +19,7 @@ spec:
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         ports:
         - containerPort: 5000
-        command: ["meltano", "ui"]
+        command: ["meltano", "--log-level=debug", "ui"]
+        env:
+        - name: "AIRFLOW__CORE__SQL_ALCHEMY_CONN"
+          value: "postgresql://postgres:postgres@meltano-postgresql.meltano:5432/postgres?sslmode=disable"

@@ -7,3 +7,99 @@ replicaCount: 1
 image:
   repository: "registry:5000/meltano"
   tag: "latest"
+
+airflow:
+  # Airflow version (Used to make some decisions based on Airflow Version being deployed)
+  airflowVersion: "2.1.2"
+  # Airflow executor
+  # Options: LocalExecutor, CeleryExecutor, KubernetesExecutor, CeleryKubernetesExecutor
+  executor: "KubernetesExecutor"
+  # Secrets
+  fernetKey: supersecretkey
+  webserverSecretKey: anothersecretkey
+
+  images:
+    airflow:
+      repository: registry:5000/meltano
+      tag: latest
+      pullPolicy: Always
+    pod_template:
+      repository: registry:5000/meltano
+      tag: latest
+      pullPolicy: Always
+
+  webserver:
+    # Command args
+    args: ["--log-level=debug", "invoke", "airflow", "webserver"]
+
+    webserverConfig: |-
+        AUTH_ROLE_PUBLIC = 'Admin'
+
+    extraVolumeMounts: # this will get the volume and mount it to that path in the container
+    - name: dags
+      mountPath: /project/orchestrate/dags/
+    - name: plugins
+      mountPath: /project/orchestrate/plugins/
+
+    extraVolumes: # this will create the volume from the directory
+    - name: dags
+      hostPath:
+        path: "/airflow_root/dags"
+    - name: plugins
+      hostPath:
+        path: "/airflow_root/plugins"
+
+  scheduler:
+    # Command args
+    args: ["--log-level=debug", "invoke", "airflow", "scheduler"]
+
+    extraVolumeMounts: # this will get the volume and mount it to that path in the container
+    - name: dags
+      mountPath: /project/orchestrate/dags/
+    - name: plugins
+      mountPath: /project/orchestrate/plugins/
+
+    extraVolumes: # this will create the volume from the directory
+    - name: dags
+      hostPath:
+        path: "/airflow_root/dags"
+    - name: plugins
+      hostPath:
+        path: "/airflow_root/plugins"
+
+  workers:
+
+    persistence:
+      enabled: false
+
+    extraVolumeMounts: # this will get the volume and mount it to that path in the container
+    - name: dags
+      mountPath: /project/orchestrate/dags/
+    - name: plugins
+      mountPath: /project/orchestrate/plugins/
+
+    extraVolumes: # this will create the volume from the directory
+    - name: dags
+      hostPath:
+        path: "/airflow_root/dags"
+    - name: plugins
+      hostPath:
+        path: "/airflow_root/plugins"
+
+  # Airflow .cfg file
+  config:
+
+    webserver:
+      expose_config: "True"
+      rbac: "False"
+      authenticate: "False"
+
+    kubernetes:
+      delete_worker_pods: "False"
+
+  # Configuration for postgresql subchart
+  # Not recommended for production
+  postgresql:
+    enabled: true
+    postgresqlPassword: postgres
+    postgresqlUsername: postgres

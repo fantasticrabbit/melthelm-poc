@@ -6,7 +6,7 @@ resource "docker_image" "meltano" {
     dockerfile = "deploy/local/Dockerfile"
     label = {
       # Forces rebuild on tf apply
-      # build_ts: timestamp()
+      build_ts: timestamp()
     }
   }
   provisioner "local-exec" {
