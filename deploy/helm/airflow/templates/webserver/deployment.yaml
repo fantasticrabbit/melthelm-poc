@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: airflow-webserver-deployment
+  labels:
+    app: airflow-webserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: airflow-webserver
+  template:
+    metadata:
+      labels:
+        app: airflow-webserver
+    spec:
+      containers:
+      - name: meltano-ui
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        ports:
+        - containerPort: 8080
+        command: ["meltano", "--log-level=debug", "invoke", "airflow", "webserver", "-d"]
+        env:
+        - name: MELTANO_DATABASE_URI
+          value: "postgresql://postgres:postgres@postgresql.meltano:5432/meltano?sslmode=disable"
+        - name: "AIRFLOW__CORE__SQL_ALCHEMY_CONN"
+          value: "postgresql://postgres:postgres@postgresql.meltano:5432/airflow?sslmode=disable"
+      initContainers:
+      - name: init-create-users
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        command:
+        - "meltano"
+        - "--log-level=debug"
+        - "invoke"
+        - "airflow"
+        - "users"
+        - "create"
+        - "--username"
+        - "admin"
+        - "--password"
+        - "admin"
+        - "--firstname"
+        - "FIRST_NAME"
+        - "--lastname"
+        - "LAST_NAME"
+        - "--role"
+        - "Admin"
+        - "--email"
+        - 'admin@example.org'
+        env:
+        - name: MELTANO_DATABASE_URI
+          value: "postgresql://postgres:postgres@postgresql.meltano:5432/meltano?sslmode=disable"
+        - name: "AIRFLOW__CORE__SQL_ALCHEMY_CONN"
+          value: "postgresql://postgres:postgres@postgresql.meltano:5432/postgres?sslmode=disable"

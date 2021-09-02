@@ -1,4 +1,5 @@
-.git
-.meltano
+.git/
+.meltano/
 # Don't add the orchestrate dir for local development
-orchestrate/
+orchestrate/dags/
+orchestrate/plugins/

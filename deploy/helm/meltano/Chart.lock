@@ -1,6 +1,0 @@
-dependencies:
-- name: airflow
-  repository: ""
-  version: 1.1.0
-digest: sha256:6d8da0e6e4c54cb0051b84a1c513c7d1f53b45989cdd8d2ad0ee426020daf582
-generated: "2021-08-31T15:15:08.215251+01:00"

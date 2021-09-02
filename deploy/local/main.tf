@@ -13,11 +13,8 @@ module "dev_images" {
   depends_on = [module.kind_cluster]
 }
 
-# Create Meltano namespace
-resource "kubernetes_namespace" "meltano" {
-  metadata {
-    name = "meltano"
-  }
+module "postgres" {
+  source = "./modules/postgres"
   depends_on = [module.kind_cluster]
 }
 
@@ -44,8 +41,26 @@ resource "helm_release" "meltano" {
     value = timestamp()
   }
 
-  depends_on = [
-    module.kind_cluster,
-    module.dev_images
-  ]
+  depends_on = [module.postgres]
+}
+
+resource "helm_release" "airflow" {
+  name        = "airflow"
+  repository  = "../helm/"
+  chart       = "airflow"
+  namespace   = "meltano"
+  version     = "0.1.0"
+  wait        = false
+  # values = [
+  #   "${file("values.yml")}"
+  # ]
+
+  # This is not a chart value, but just a way to trick helm_release into running every time.
+  # Without this, helm_release only updates the release if the chart version (in Chart.yaml) has been updated
+  set {
+    name  = "timestamp"
+    value = timestamp()
+  }
+
+  depends_on = [module.postgres]
 }

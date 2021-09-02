@@ -5,6 +5,12 @@ plugins:
   orchestrators:
   - name: airflow
     pip_url: psycopg2 apache-airflow==2.1.2 --constraint https://raw.githubusercontent.com/apache/airflow/constraints-2.1.2/constraints-${MELTANO__PYTHON_VERSION}.txt
+    config:
+      webserver:
+        rbac: false
+        expose_config: true
+        authenticate: false
+        base_url: "/airflow"
   files:
   - name: airflow
     pip_url: git+https://gitlab.com/meltano/files-airflow.git

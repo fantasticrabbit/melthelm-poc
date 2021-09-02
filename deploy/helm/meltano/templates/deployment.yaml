@@ -21,5 +21,5 @@ spec:
         - containerPort: 5000
         command: ["meltano", "--log-level=debug", "ui"]
         env:
-        - name: "AIRFLOW__CORE__SQL_ALCHEMY_CONN"
-          value: "postgresql://postgres:postgres@meltano-postgresql.meltano:5432/postgres?sslmode=disable"
+        - name: MELTANO_DATABASE_URI
+          value: "postgresql://postgres:postgres@postgresql.meltano:5432/meltano?sslmode=disable"
