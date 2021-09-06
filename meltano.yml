@@ -2,15 +2,43 @@ version: 1
 send_anonymous_usage_stats: true
 project_id: a855d787-5d58-44b3-a534-a652a1fec24b
 plugins:
+  extractors:
+  - name: tap-carbon-intensity
+    variant: meltano
+    pip_url: git+https://gitlab.com/meltano/tap-carbon-intensity.git
+    config:
+      start_date: '2021-10-01T00:00:00Z'
+  loaders:
+  - name: target-jsonl
+    variant: andyh1203
+    pip_url: target-jsonl
+    config:
+      destination_path: /project/output
   orchestrators:
   - name: airflow
-    pip_url: psycopg2 apache-airflow==2.1.2 --constraint https://raw.githubusercontent.com/apache/airflow/constraints-2.1.2/constraints-${MELTANO__PYTHON_VERSION}.txt
+    pip_url: psycopg2 apache-airflow[kubernetes]==2.1.2 --constraint https://raw.githubusercontent.com/apache/airflow/constraints-2.1.2/constraints-${MELTANO__PYTHON_VERSION}.txt
     config:
       webserver:
         rbac: false
         expose_config: true
         authenticate: false
-        base_url: "/airflow"
+        base_url: /airflow
+      core:
+        executor: KubernetesExecutor
+      kubernetes:
+        delete_worker_pods: false
+        namespace: meltano
+        worker_container_repository: registry:5000/meltano
+        worker_container_tag: latest
+        in_cluster: true
+        pod_template_file: /project/.meltano/run/airflow/pod-template-file.yml
   files:
   - name: airflow
     pip_url: git+https://gitlab.com/meltano/files-airflow.git
+schedules:
+- name: carbon-intensity-to-jsonl
+  extractor: tap-carbon-intensity
+  loader: target-jsonl
+  transform: skip
+  interval: '*/5 * * * *'
+  start_date: 2021-09-01 00:00:00

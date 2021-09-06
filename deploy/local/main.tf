@@ -24,7 +24,7 @@ resource "helm_release" "meltano" {
   chart       = "meltano"
   namespace   = "meltano"
   version     = "0.1.0"
-  wait        = false
+  wait        = true
   # values = [
   #   "${file("values.yml")}"
   # ]
@@ -41,7 +41,28 @@ resource "helm_release" "meltano" {
     value = timestamp()
   }
 
-  depends_on = [module.postgres]
+  depends_on = [module.dev_images, module.postgres]
+}
+
+resource "helm_release" "nfs_server_provisioner" {
+  name        = "nfs-server-provisioner"
+  repository  = "https://helm.wso2.com/"
+  chart       = "nfs-server-provisioner"
+  namespace   = "meltano"
+  version     = "1.1.0"
+  wait        = true
+  values = [
+    "${file("nfs-server-provider-values.yml")}"
+  ]
+
+  # This is not a chart value, but just a way to trick helm_release into running every time.
+  # Without this, helm_release only updates the release if the chart version (in Chart.yaml) has been updated
+  set {
+    name  = "timestamp"
+    value = timestamp()
+  }
+
+  depends_on = [module.kind_cluster]
 }
 
 resource "helm_release" "airflow" {
@@ -62,5 +83,5 @@ resource "helm_release" "airflow" {
     value = timestamp()
   }
 
-  depends_on = [module.postgres]
+  depends_on = [module.dev_images, module.postgres, helm_release.nfs_server_provisioner]
 }

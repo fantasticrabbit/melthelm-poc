@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: airflow-scheduler-deployment
+  labels:
+    app: airflow-scheduler
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: airflow-scheduler
+  template:
+    metadata:
+      labels:
+        app: airflow-scheduler
+    spec:
+      serviceAccountName: airflow-scheduler-service-account
+      containers:
+      - name: airflow-scheduler
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        ports:
+        - containerPort: 8793
+        command: ["meltano", "--log-level=debug", "invoke", "airflow", "scheduler"]
+        env:
+        - name: MELTANO_DATABASE_URI
+          value: "postgresql://postgres:postgres@postgresql.meltano:5432/meltano?sslmode=disable"
+        - name: "AIRFLOW__CORE__SQL_ALCHEMY_CONN"
+          value: "postgresql://postgres:postgres@postgresql.meltano:5432/airflow?sslmode=disable"
+        volumeMounts:
+          - name: logs
+            mountPath: "/project/.meltano/run/airflow/logs"
+      volumes:
+      - name: logs
+        persistentVolumeClaim:
+          claimName: airflow-logs

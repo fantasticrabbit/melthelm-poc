@@ -14,8 +14,9 @@ spec:
       labels:
         app: airflow-webserver
     spec:
+      serviceAccountName: airflow-scheduler-service-account
       containers:
-      - name: meltano-ui
+      - name: airflow-webserver
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         ports:
         - containerPort: 8080
@@ -25,6 +26,11 @@ spec:
           value: "postgresql://postgres:postgres@postgresql.meltano:5432/meltano?sslmode=disable"
         - name: "AIRFLOW__CORE__SQL_ALCHEMY_CONN"
           value: "postgresql://postgres:postgres@postgresql.meltano:5432/airflow?sslmode=disable"
+        volumeMounts:
+        - name: logs
+          mountPath: "/project/.meltano/run/airflow/logs"
+        - name: output
+          mountPath: "/project/output"
       initContainers:
       - name: init-create-users
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -51,4 +57,11 @@ spec:
         - name: MELTANO_DATABASE_URI
           value: "postgresql://postgres:postgres@postgresql.meltano:5432/meltano?sslmode=disable"
         - name: "AIRFLOW__CORE__SQL_ALCHEMY_CONN"
-          value: "postgresql://postgres:postgres@postgresql.meltano:5432/postgres?sslmode=disable"
+          value: "postgresql://postgres:postgres@postgresql.meltano:5432/airflow?sslmode=disable"
+      volumes:
+      - name: logs
+        persistentVolumeClaim:
+          claimName: airflow-logs
+      - name: output
+        persistentVolumeClaim:
+          claimName: airflow-output

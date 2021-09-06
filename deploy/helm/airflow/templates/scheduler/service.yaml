@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: airflow-scheduler
+  labels:
+    tier: airflow
+    component: scheduler
+spec:
+  selector:
+    app: airflow-scheduler
+    tier: airflow
+    component: scheduler
+  ports:
+    - name: task-logs
+      port: 8793
+      targetPort: 8793
+      protocol: TCP

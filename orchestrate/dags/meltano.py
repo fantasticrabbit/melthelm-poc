@@ -100,7 +100,7 @@ for schedule in schedules:
 
     elt = BashOperator(
         task_id="extract_load",
-        bash_command=f"cd {project_root}; {meltano_bin} schedule run {schedule['name']}",
+        bash_command=f"cd {project_root}; {meltano_bin} --log-level=debug schedule run {schedule['name']}",
         dag=dag,
     )
 

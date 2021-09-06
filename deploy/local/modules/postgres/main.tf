@@ -22,6 +22,11 @@ resource "helm_release" "postgres" {
   }
 
   set {
+    name = "persistence.storageClass"
+    value = "standard"
+  }
+
+  set {
     name = "initdbScripts.init\\.sql"
     value = <<EOF
   CREATE DATABASE meltano OWNER postgres;

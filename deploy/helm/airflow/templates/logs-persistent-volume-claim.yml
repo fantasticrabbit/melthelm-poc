@@ -1,0 +1,16 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: airflow-logs
+  labels:
+    tier: airflow
+    component: logs-pvc
+    release: {{ .Release.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
+spec:
+  storageClassName: "nfs"
+  accessModes: ["ReadWriteMany"]
+  resources:
+    requests:
+      storage: 1Gi

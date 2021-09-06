@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dummy-name
+  labels:
+    tier: airflow
+    component: worker
+spec:
+  restartPolicy: Never
+  containers:
+    - args: []
+      command: ["meltano", "--log-level=debug", "invoke"]
+      envFrom:
+      env:
+        - name: AIRFLOW__CORE__EXECUTOR
+          value: LocalExecutor
+        - name: MELTANO_DATABASE_URI
+          value: "postgresql://postgres:postgres@postgresql.meltano:5432/meltano?sslmode=disable"
+        - name: "AIRFLOW__CORE__SQL_ALCHEMY_CONN"
+          value: "postgresql://postgres:postgres@postgresql.meltano:5432/airflow?sslmode=disable"
+      image: registry:5000/meltano:latest
+      imagePullPolicy: Always
+      name: base
+      ports: []
+      volumeMounts:
+        - name: logs
+          mountPath: "/project/.meltano/run/airflow/logs"
+        - name: output
+          mountPath: "/project/output"
+  volumes:
+    - name: logs
+      persistentVolumeClaim:
+        claimName: airflow-logs
+    - name: output
+      persistentVolumeClaim:
+        claimName: airflow-output
